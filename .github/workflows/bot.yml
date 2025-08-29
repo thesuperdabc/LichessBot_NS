@@ -12,7 +12,7 @@ jobs:
     
     steps:
     - name: Checkout code with LFS
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         lfs: true  # This ensures Git LFS files are downloaded properly
     
