@@ -1,0 +1,424 @@
+token: "XXXXXXXXXXXXXXXXXXX"         # Lichess OAuth2 Token.
+
+engines:
+  bullet:                               # Engine used for standard chess and when no suitable special engine is configured.
+    dir: "./engines"                      # Directory containing the engine.
+    name: "sf"                     # Binary name of the engine to use.
+    ponder: true                          # Think on opponent's time.
+    silence_stderr: false                 # Suppresses stderr output.
+    move_overhead_multiplier: 19.0         # Optimized for bullet games.
+    uci_options:                          # Arbitrary UCI options passed to the engine.
+      Threads: 8                          # Increased threads for Threadripper power.
+      Hash: 4000                           # Increased hash for better position evaluation.
+      Move Overhead: 100                  # Reduced for faster bullet moves.
+    limits:                               # Limits that end the move calculation early.
+   #   depth: 28                          # Maximum search depth for bullet.
+
+  chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
+    dir: "./engines"                      # Directory containing the engine.
+    name: "sf"                     # Binary name of the engine to use.
+    ponder: true                          # Think on opponent's time.
+    silence_stderr: false                 # Suppresses stderr output.
+    move_overhead_multiplier: 20.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
+    uci_options:                          # Arbitrary UCI options passed to the engine.
+      Threads: 8                          # Max CPU threads the engine can use.
+      Hash: 4096                           # Max memory (in megabytes) the engine can allocate.
+      Move Overhead: 100                  # Increase if your bot flags games too often.
+    limits:
+    
+  standard:                               # Engine used for standard chess and when no suitable special engine is configured.
+    dir: "./engines"                      # Directory containing the engine.
+    name: "sf"                     # Binary name of the engine to use.
+    ponder: true                          # Think on opponent's time.
+    silence_stderr: false                 # Suppresses stderr output.
+    move_overhead_multiplier: 1.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
+    uci_options:                          # Arbitrary UCI options passed to the engine.
+      Threads: 8                          # Maximum Threadripper power for longer games.
+      Hash: 4096                           # Massive hash for deep calculation.
+      Move Overhead: 100                  # Increase if your bot flags games too often.
+    limits:    
+  #    depth: 35                           # Deep search for standard games.
+  #    nodes: 8000000                      # High node count for thorough analysis.
+  variants:                               # Engine used for variants when no suitable special engine is configured.
+    dir: "./engines"                      # Directory containing the engine.
+    name: "fsf"           # Binary name of the engine to use. (You need to download Fairy-Stockfish and place it in the engines directory)
+    ponder: true                          # Think on opponent's time.
+    silence_stderr: false                 # Suppresses stderr output.
+    move_overhead_multiplier: 1.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
+    uci_options:                          # Arbitrary UCI options passed to the engine.
+      Threads: 8                          # High thread count for variants.
+      Hash: 4096                           # Large hash for variant calculations.
+      Move Overhead: 100                  # Increase if your bot flags games too often.
+      Use NNUE: true
+      EvalFile: "3check-cb5f517c228b.nnue:antichess-dd3cbe53cd4e.nnue:atomic-2cf13ff256cc.nnue:crazyhouse-8ebf84784ad2.nnue:horde-28173ddccabe.nnue:kingofthehill-978b86d0e6a4.nnue:racingkings-636b95f085e3.nnue"
+    limits:   # Limits that end the move calculation early.
+  #    depth: 30                           # Deep variant search.
+ #     nodes: 6000000                      # High node count for variants.
+# Use the same pattern for 'bullet', 'blitz', 'rapid', 'classical', time controls in initial_minutes+increment_seconds format,
+# 'antichess', 'atomic', 'chess960', 'crazyhouse', 'horde', 'kingofthehill', 'racingkings' and '3check' as well.
+# Append '_white', '_black', '_human' and/or '_tournament' to use the engine only as the specific color, against humans or in tournaments.
+
+syzygy:
+  standard:
+    enabled: false                        # Activate local syzygy endgame tablebases.
+    paths:                                # Paths to local syzygy endgame tablebases.
+      - "./syzygy"
+    max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
+    instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
+  chess960:
+    enabled: false                        # Activate local syzygy endgame tablebases.
+    paths:                                # Paths to local syzygy endgame tablebases.
+      - "./syzygy"
+    max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
+    instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
+  antichess:
+    enabled: false                        # Activate local syzygy endgame tablebases.
+    paths:                                # Paths to local syzygy endgame tablebases.
+      - "/path/to/antichess/syzygy"
+    max_pieces: 6                         # Count of max pieces in the local syzygy endgame tablebases.
+    instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
+  atomic:
+    enabled: false                        # Activate local syzygy endgame tablebases.
+    paths:                                # Paths to local syzygy endgame tablebases.
+      - "/path/to/atomic/syzygy"
+    max_pieces: 6                         # Count of max pieces in the local syzygy endgame tablebases.
+    instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
+
+gaviota:
+  enabled: false                          # Activate local gaviota endgame tablebases.
+  paths:                                  # Paths to local gaviota endgame tablebases.
+    - "/path/to/gaviota"
+  max_pieces: 5                           # Count of max pieces in the local gaviota endgame tablebases.
+
+opening_books:
+  enabled: true                           # Activate opening books.
+  priority: 400                           # Priority with which this move source is used. Higher priority is used first.
+  read_learn: false                       # Whether to read the learn values from the books.
+  books:
+#   bullet:
+#     selection: weighted_random          # Move selection is one of "weighted_random", "uniform_random" or "best_move".
+#     names:                              # List of names of books to use in bullet.
+#       - BulletBook
+#       - DefaultBook
+#   standard_black:
+#     selection: best_move                # Move selection is one of "weighted_random", "uniform_random" or "best_move".
+#     names:                              # List of names of books to use as black.
+#       - BlackBook
+    0.5+0_white:                          # 30 sec bullet games (0.5+0)
+      selection: best_move
+      max_depth: 20                    # Limit book depth so engine evaluates positions
+      names:
+        - nimas
+    0.5+0_black:                          # 30 sec bullet games (0.5+0)
+      selection: best_move
+      max_depth: 20                    # Limit book depth so engine evaluates positions
+      names:
+        - probook
+    bullet_white:                            # Other bullet games (1+0)
+      selection: weighted_random
+      max_depth: 20                    # Limit book depth so engine evaluates positions
+      names:
+        - small
+        - probook
+    bullet_black:                            # Aggressive black bullet setup
+      selection: best_move                # Always play strongest moves as black
+      max_depth: 15                    # Deeper book usage for black preparation
+      names:
+        - small
+        - probook
+    3+0:                             # Blitz games (5+3)
+      selection: weighted_random
+      names:
+        - small
+        - probook
+    standard:                           
+      selection: weighted_random
+      names:
+        - small
+    antichess_white:
+      selection: best_move
+      names:
+        - whiteanti
+    antichess_black:
+      selection: best_move
+      names:
+        - blackanti
+    3check_white:
+      selection: best_move
+      names:
+        - white3check
+    kingofthehill_black:
+      selection: best_move
+      names:
+        - blackkingofhill
+    kingofthehill_white:
+      selection: best_move
+      names:
+        - whitekingofhill
+    atomic_white:
+      selection: best_move
+      names:
+        - whiteatomic
+    crazyhouse:
+      selection: best_move
+      names:
+        - crazyhouse
+    chess960:
+      selection: best_move
+      names:
+        - chess960
+    atomic_black:
+      selection: best_move
+      names:
+        - blackatomic
+    horde:
+      selection: best_move
+      names:
+        - horde
+    racingkings_white_human:
+      selection: best_move
+      names:
+        - whiterk
+    racingkings_black_human:
+      selection: best_move
+      names:
+        - blackrk
+    3check_black:
+      selection: best_move
+      names:
+        - black3check    
+    standard_human:
+      selection: weighted_random
+      random_selection: true  
+      names:
+        - Nakamura
+        - Carlsen
+        - Caruana
+        - Ding
+        - Gukesh
+    bullet_human:
+      selection: weighted_random
+      random_selection: true
+      names:
+        - Kasparov
+        - Carlsen
+        - Caruana
+        - Ding
+        - Gukesh
+        - Nakamura
+        - Nepomniachtchi
+    blitz_human:
+      selection: weighted_random
+      random_selection: true
+      names:
+        - Nakamura
+        - Carlsen
+        - Nepomniachtchi
+    rapid_human:
+      selection: best_move
+      random_selection: true
+      names:
+        - Kasparov
+        - Carlsen
+        - Caruana
+        - Ding
+        - Gukesh
+        - Nakamura
+        - Nepomniachtchi
+#   Use the same pattern for 'bullet', 'blitz', 'rapid', 'classical', time controls in initial_minutes+increment_seconds format,
+#   'antichess', 'atomic', 'chess960', 'crazyhouse', 'horde', 'kingofthehill', 'racingkings' and '3check' as well.
+#   Append '_white', '_black', '_human' and/or '_tournament' to use the book only as the specific color, against humans or in tournaments.
+
+online_moves:
+  opening_explorer:
+    enabled: false                        # Activate online moves from Lichess opening explorer. The move that has performed best for this bot is played.
+    priority: 300                         # Priority with which this move source is used. Higher priority is used first.
+#   player: Username                      # Player whose Lichess opening explorer should be used. Comment this to use your own or with anti your opponent's.
+    only_without_book: false              # Whether the Lichess opening explorer should only be used if there is no matching book.
+    use_for_variants: false               # Whether the Lichess opening explorer should be used for other variants than standard and chess960.
+    min_time: 10                          # Time the bot must have at least to use the online move. +10 seconds in games without increment.
+    timeout: 5                            # Time the server has to respond.
+    min_games: 5                          # Minimum number of games in which the position must have occurred.
+    only_with_wins: false                 # Whether to play only moves that have won before.
+    selection: "performance"              # Move selection is "performance" or "win_rate".
+    anti: false                           # Whether to play the moves in which the opponent performs the worst.
+#   max_depth: 16                         # Half move max depth. (Comment this line for max depth)
+#   max_moves: 1                          # Max number of moves played from Lichess opening explorer. (Comment this line for max moves)
+  lichess_cloud:
+    enabled: false                        # Activate online moves from Lichess cloud eval.
+    priority: 200                         # Priority with which this move source is used. Higher priority is used first.
+    only_without_book: false              # Whether the cloud should only be used if there is no matching book.
+    use_for_variants: false               # Whether the cloud should be used for other variants than standard and chess960.
+    min_eval_depth: 10                    # Minimum evaluation depth.
+    min_time: 10                          # Time the bot must have at least to use the online move. +10 seconds in games without increment.
+    timeout: 5                            # Time the server has to respond.
+#   max_depth: 16                         # Half move max depth. (Comment this line for max depth)
+#   max_moves: 1                          # Max number of moves played from Lichess cloud eval. (Comment this line for max moves)
+  chessdb:
+    enabled: false                        # Activate online moves from https://chessdb.cn/queryc_en/
+    priority: 100                         # Priority with which this move source is used. Higher priority is used first.
+    only_without_book: false              # Whether the chessdb should only be used if there is no matching book.
+    min_candidates: 1                     # Minimum number of candidate moves.
+    min_time: 10                          # Time the bot must have at least to use the online move. +10 seconds in games without increment.
+    timeout: 5                            # Time the server has to respond.
+    selection: "best"                     # Move selection is one of "optimal", "best" or "good".
+#   max_depth: 16                         # Half move max depth. (Comment this line for max depth)
+#   max_moves: 1                          # Max number of moves played from chessdb. (Comment this line for max moves)
+  online_egtb:
+    enabled: true                        # Activate online endgame tablebases from Lichess.
+    min_time: 20                           # Time the bot must have at least to use the online move. +10 seconds in games without increment.
+    timeout: 3                            # Time the server has to respond.
+
+offer_draw:
+  enabled: true                           # Activate whether the bot should offer draw.
+  score: 10                                # Tighter draw threshold - only accept truly equal positions.
+  consecutive_moves: 5                   # More moves required before considering draw.
+  min_game_length: 25                     # Later draw offers to avoid early draws.
+  against_humans: false                    # Activate whether these settings should apply against humans.
+  allow_in_tournaments: true             # Allow offering draws in tournaments even for 0.5+0 games. By default, draws are never offered in 0.5+0 games.
+  accept_30_second_draws: true          
+# min_rating: 2300                        # Minimum rating of opponent to offer draw.
+
+resign:
+  enabled: true                          # Enable resignation to avoid hopeless positions.
+  score: -800                            # Resign when clearly losing (8 pawns down).
+  consecutive_moves: 8                    # More moves to confirm truly lost position.
+  against_humans: false                    # Never resign against humans - fight till the end.
+# min_rating: 2300                        # Minimum rating of opponent to resign.
+
+rematch:
+  enabled: true                           # Enable rematch functionality.
+  max_consecutive: 3                      # Maximum consecutive rematches with same opponent.
+  offer_on_win: true                      # Offer rematch when we win.
+  offer_on_loss: true                     # Offer rematch when we lose.
+  offer_on_draw: true                     # Offer rematch on draws.
+  against_humans: false                    # Offer rematches against human players.
+  against_bots: true                      # Offer rematches against bot players.
+  delay_seconds: 1                        # Delay before offering rematch (seconds).
+  timeout_seconds: 30                     # Timeout for rematch challenges (seconds).
+# min_rating_diff: 0                      # Minimum rating difference to offer rematch.
+# max_rating_diff: 300                    # Maximum rating difference to offer rematch.
+
+challenge:                                # Incoming challenges.
+  concurrency: 1                          # Number of games to play simultaneously.
+  max_takebacks: 3                        # Maximum number of takebacks granted to a human.
+  bullet_with_increment_only: false       # Whether bullet games against BOTs should only be accepted with increment.
+# min_increment: 0                        # Minimum amount of increment to accept a challenge.
+# max_increment: 180                      # Maximum amount of increment to accept a challenge.
+# min_initial: 0                          # Minimum amount of initial time to accept a challenge.
+# max_initial: 315360000                  # Maximum amount of initial time to accept a challenge.
+  min_rating_diff: 0                     # Accept all bot challenges - no minimum rating difference
+  max_rating_diff: 300                   # Accept much stronger opponents for training
+  variant_rating_diffs:
+    standard:
+      max: 200            
+    chess960:
+      max: 350             
+    antichess:
+      max: 500  
+    atomic:
+      max: 400              
+    crazyhouse:
+      max: 400              
+    horde:
+      max: 500
+    kingOfTheHill:
+      max: 500
+    racingKings:
+      max: 500
+    threeCheck:
+      max: 500
+  variants:                               # Chess variants to accept (https://lichess.org/variant).
+    - standard
+    - chess960
+    - fromPosition
+    - antichess
+    - atomic
+    - crazyhouse
+    - horde
+    - kingOfTheHill
+    - racingKings
+    - threeCheck
+  time_controls:                          # Speeds or time controls in initial_minutes+increment_seconds format to accept.
+    - bullet
+    - blitz
+    - rapid
+#   - classical
+    - 25+0
+  bot_modes:                              # Game modes to accept against BOTs.
+    - casual                              # Unrated games (accept casual games even if they don't meet min rating diff)
+    - rated                               # Rated games
+  human_modes:                            # Game modes to accept against humans.
+    - casual                              # Unrated games.
+    - rated                               # Rated games
+
+matchmaking:
+  delay: 10                               # Time in seconds the bot must be idle before a new challenge is started.
+  timeout: 30                             # Time until a challenge is canceled.
+  selection: weighted_random              # Matchmkaing type selection is one of "weighted_random", "sequential" or "cyclic".
+  types:                                  # Matchmaking types of which one is selected before each game.
+    bullet:                               # Arbitrary name of the matchmaking type. Names must be unique.
+      tc: 0.5+0                             # Time control in initial_minutes+increment_seconds format.
+#   casual_chess960:
+#     tc: 0.5+1
+#     rated: false
+#     variant: chess960
+#   optional_settings:
+#     rated: true                         # Whether matchmaking should play rated games. Default: true
+#     variant: standard                   # Chess variant (https://lichess.org/variant) to challenge. Default: standard
+#     weight: 100                         # Weight with which this type is selected. Default: Types are played according to their time control.
+#     multiplier: 15                      # Multiplier for calculating timeouts in matchmaking. Default: smart multiplier calculation.
+#     min_rating_diff: 0                  # Minimum rating distance to opponent. Default: 0
+#     max_rating_diff: 300                # Maximum rating distance to opponent. Default: 10000
+
+messages:
+  # Optional substitution keywords (include curly braces):
+  #   {opponent} to insert the opponent's name
+  #   {me} to insert our name
+  #   {engine} to insert engine name
+  #   {cpu} to insert CPU information
+  #   {ram} to insert RAM size
+  # Any other words in curly braces will be removed.
+  greeting: "Hello {opponent}! Good luck and have fun! Type !help for a list of commands."
+  goodbye: "Thank you for the game, {opponent}!"
+  greeting_spectators: "Welcome spectators! Type !help for a list of commands."
+  goodbye_spectators: "Thank you all for watching!"
+
+whitelist:                                # List of users whose challenges are always accepted.
+# - Username1
+# - Username2
+
+blacklist:                                # List of users who are not challenged and whose challenges are declined.
+# - Username1
+# - Username2
+
+
+
+books:                                    
+  Kasparov: "./masterbooks/Kasparov.bin"     # Kasparov's opening book 
+  Carlsen: "./masterbooks/Carlsen.bin"       # Carlsen's opening book
+  Caruana: "./masterbooks/Caruana.bin"       # Caruana's opening book
+  Ding: "./masterbooks/Ding.bin"             # Ding's opening book
+  Gukesh: "./masterbooks/Gukesh.bin"         # Gukesh's opening book
+  Nakamura: "./masterbooks/Nakamura.bin"     # Nakamura's opening book
+  Nepomniachtchi: "./masterbooks/Nepomniachtchi.bin"  # Nepomniachtchi's opening book
+  probook: "./books/probook.bin"
+  whiteanti: "./books/whiteanti.bin"
+  blackanti: "./books/blackanti.bin"
+  blackrk: "./books/blackrk.bin"
+  whiterk: "./books/whiterk.bin"
+  whiteatomic: "./books/whiteatomic.bin"
+  blackatomic: "./books/blackatomic.bin"
+  horde: "./books/horde.bin"
+  chess960: "./books/chess960.bin"
+  whitekingofhill: "./books/whitekingofhill.bin"
+  blackkingofhill: "./books/blackkingofhill.bin"
+  crazyhouse: "./books/crazyhouse.bin"
+  white3check: "./books/white3check.bin"
+  black3check: "./books/black3check.bin"
+  small: "./books/small.bin"
+  nimas: "./books/nimas.bin"
+
+
+
+
