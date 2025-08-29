@@ -124,7 +124,7 @@ jobs:
     - name: Start bot
       run: |
         echo "🚀 Launching Lichess bot..."
-        python user_interface.py -u &
+        python user_interface.py -u matchmaking &
         BOT_PID=$!
         echo "Bot started with PID: $BOT_PID"
         
