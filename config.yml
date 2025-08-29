@@ -60,13 +60,13 @@ engines:
 
 syzygy:
   standard:
-    enabled: true                        # Activate local syzygy endgame tablebases.
+    enabled: false                        # Activate local syzygy endgame tablebases.
     paths:                                # Paths to local syzygy endgame tablebases.
       - "./syzygy"
     max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
     instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
   chess960:
-    enabled: true                        # Activate local syzygy endgame tablebases.
+    enabled: false                        # Activate local syzygy endgame tablebases.
     paths:                                # Paths to local syzygy endgame tablebases.
       - "./syzygy"
     max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
