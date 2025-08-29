@@ -1,0 +1,50 @@
+name: Test Bot
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+      
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: pip install PyYAML chess
+        
+    - name: Validate config
+      run: |
+        python3 << 'EOF'
+        import yaml
+        import sys
+        
+        try:
+            with open('config.yml', 'r') as f:
+                config = yaml.safe_load(f)
+            
+            required_sections = ['engines', 'opening_books', 'challenge']
+            for section in required_sections:
+                if section not in config:
+                    raise ValueError(f"Missing section: {section}")
+            
+            for engine_name, engine_config in config['engines'].items():
+                if 'uci_options' not in engine_config:
+                    raise ValueError(f"Engine {engine_name} missing uci_options")
+            
+            print("Config validation passed")
+            
+        except Exception as e:
+            print(f"Config validation failed: {e}")
+            sys.exit(1)
+        EOF
+        
+    - name: Test engine module
+      run: python3 -c "import chess.engine; print('Engine module available')"

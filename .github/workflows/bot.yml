@@ -1,0 +1,147 @@
+name: Lichess Bot Runner
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '1 */5 * * *'  # Every 5 hours at minute 1
+
+jobs:
+  lichess-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300  # 5 hours max
+    
+    steps:
+    - name: Checkout code with LFS
+      uses: actions/checkout@v4
+      with:
+        lfs: true  # This ensures Git LFS files are downloaded properly
+    
+    - name: Setup Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Configure bot token
+      run: |
+        # Replace token in config file
+        python -c "
+        import yaml
+        with open('config.yml', 'r') as f:
+            config = yaml.safe_load(f)
+        config['token'] = '${{ secrets.LICHESS_TOKEN }}'
+        with open('config.yml', 'w') as f:
+            yaml.dump(config, f, default_flow_style=False)
+        "
+    
+    - name: Verify Syzygy Tablebases
+      run: |
+        echo "📚 Verifying Syzygy tablebases..."
+        
+        if [ -d "./syzygy" ]; then
+          echo "✅ Syzygy directory found"
+          
+          # Count tablebase files
+          rtbw_count=$(find ./syzygy -name "*.rtbw" | wc -l)
+          rtbz_count=$(find ./syzygy -name "*.rtbz" | wc -l)
+          echo "RTBW files: $rtbw_count"
+          echo "RTBZ files: $rtbz_count"
+          echo "Total tablebase files: $((rtbw_count + rtbz_count))"
+          
+          # Check if files are actually downloaded (not just LFS pointers)
+          sample_file=$(find ./syzygy -name "*.rtbw" | head -1)
+          if [ -n "$sample_file" ]; then
+            file_size=$(stat -c%s "$sample_file" 2>/dev/null || echo "0")
+            echo "Sample file: $sample_file"
+            echo "Sample file size: $file_size bytes"
+            
+            if [ "$file_size" -gt 1000 ]; then
+              echo "✅ Tablebase files properly downloaded from Git LFS"
+              echo "Total syzygy directory size: $(du -sh ./syzygy 2>/dev/null || echo 'Size calculation failed')"
+            else
+              echo "❌ ERROR: Files are still LFS pointers!"
+              echo "File content:"
+              head -c 200 "$sample_file" || echo "Cannot read file"
+              exit 1
+            fi
+          fi
+        else
+          echo "❌ Syzygy directory not found"
+          ls -la ./
+          exit 1
+        fi
+    
+    - name: Setup Stockfish engines
+      run: |
+        # Create engines directory
+        mkdir -p engines
+        
+        # Download latest Stockfish from abrok.eu
+        curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
+        unzip -o stockfish.zip -d engines/
+        
+        # Debug: Show what was extracted
+        echo "Contents after extraction:"
+        ls -la engines/
+        
+        # Find and copy the actual Stockfish binary (more robust than mv)
+        if [ -d "engines/stockfish_x64_modern" ]; then
+          echo "Found stockfish_x64_modern directory"
+          cp engines/stockfish_x64_modern/stockfish engines/stockfish
+        elif [ -f "engines/stockfish_x64_modern" ]; then
+          echo "Found stockfish_x64_modern file"
+          mv engines/stockfish_x64_modern engines/stockfish
+        else
+          echo "Looking for any stockfish executable..."
+          find engines/ -name "stockfish*" -type f -executable | head -1 | xargs -I {} cp {} engines/stockfish
+        fi
+        
+        chmod +x engines/stockfish
+        
+        # Make fsf executable (if it exists in your repo)
+        if [ -f "./engines/fsf" ]; then
+          chmod +x ./engines/fsf
+          echo "FSF engine made executable"
+        fi
+        
+        # Verify engine works
+        if [ -f "./engines/stockfish" ] && [ -x "./engines/stockfish" ]; then
+          echo "✅ Stockfish engine setup successful"
+          echo "Testing Stockfish engine..."
+          timeout 5s ./engines/stockfish quit || echo "Stockfish engine ready"
+        else
+          echo "❌ Stockfish engine setup failed"
+          echo "Final engines directory:"
+          ls -la engines/
+          exit 1
+        fi
+    
+    - name: Start bot
+      run: |
+        echo "🚀 Launching Lichess bot..."
+        python user_interface.py -u &
+        BOT_PID=$!
+        echo "Bot started with PID: $BOT_PID"
+        
+        # Run for 4.5 hours then gracefully stop
+        sleep 16200
+
+        echo "⏰ Time limit reached, stopping bot..."
+        kill -TERM $BOT_PID 2>/dev/null || true
+        wait $BOT_PID 2>/dev/null || true
+        echo "✅ Bot stopped successfully"
+    
+    - name: Trigger next run
+      if: always()
+      run: |
+        curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/actions/workflows/bot.yml/dispatches \
+          -d '{"ref":"${{ github.ref_name }}"}'
