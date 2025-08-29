@@ -34,7 +34,7 @@ engines:
     move_overhead_multiplier: 1.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Maximum Threadripper power for longer games.
-      Hash: 4096                           # Massive hash for deep calculation.
+      Hash: 8192                           # Massive hash for deep calculation.
       Move Overhead: 100                  # Increase if your bot flags games too often.
     limits:    
   #    depth: 35                           # Deep search for standard games.
@@ -47,7 +47,7 @@ engines:
     move_overhead_multiplier: 1.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # High thread count for variants.
-      Hash: 4096                           # Large hash for variant calculations.
+      Hash: 8192                           # Large hash for variant calculations.
       Move Overhead: 100                  # Increase if your bot flags games too often.
       Use NNUE: true
       EvalFile: "3check-cb5f517c228b.nnue:antichess-dd3cbe53cd4e.nnue:atomic-2cf13ff256cc.nnue:crazyhouse-8ebf84784ad2.nnue:horde-28173ddccabe.nnue:kingofthehill-978b86d0e6a4.nnue:racingkings-636b95f085e3.nnue"
@@ -447,7 +447,7 @@ books:
   Gukesh: "./masterbooks/Gukesh.bin"         # Gukesh's opening book
   Nakamura: "./masterbooks/Nakamura.bin"     # Nakamura's opening book
   Nepomniachtchi: "./masterbooks/Nepomniachtchi.bin"  # Nepomniachtchi's opening book
-  probook: "./books/probook.bin"
+  probook: "./books/lowpro.bin"
   whiteanti: "./books/whiteanti.bin"
   blackanti: "./books/blackanti.bin"
   blackrk: "./books/blackrk.bin"
