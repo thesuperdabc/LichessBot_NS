@@ -70,4 +70,4 @@ jobs:
       timeout-minutes: 340
       run: |
         echo "🤖 Starting bot..."
-        python3 user_interface.py -u
+        python3 user_interface.py -u "matchmaking"
