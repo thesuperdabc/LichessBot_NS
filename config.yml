@@ -6,7 +6,7 @@ engines:
     name: "sf"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 19.0         # Optimized for bullet games.
+    move_overhead_multiplier: 19.5         # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 6                          # Increased threads for Threadripper power.
       Hash: 5120                           # Increased hash for better position evaluation.
@@ -276,7 +276,7 @@ offer_draw:
   min_game_length: 25                     # Later draw offers to avoid early draws.
   against_humans: false                    # Activate whether these settings should apply against humans.
   allow_in_tournaments: true             # Allow offering draws in tournaments even for 0.5+0 games. By default, draws are never offered in 0.5+0 games.
-  accept_30_second_draws: true          
+  accept_30_second_draws: false          
 # min_rating: 2300                        # Minimum rating of opponent to offer draw.
 
 resign:
@@ -287,7 +287,7 @@ resign:
 # min_rating: 2300                        # Minimum rating of opponent to resign.
 
 rematch:
-  enabled: true                           # Enable rematch functionality.
+  enabled: false                           # Enable rematch functionality.
   max_consecutive: 3                      # Maximum consecutive rematches with same opponent.
   offer_on_win: true                      # Offer rematch when we win.
   offer_on_loss: true                     # Offer rematch when we lose.
