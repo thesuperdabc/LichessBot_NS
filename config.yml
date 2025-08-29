@@ -8,8 +8,8 @@ engines:
     silence_stderr: false                 # Suppresses stderr output.
     move_overhead_multiplier: 19.0         # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
-      Threads: 8                          # Increased threads for Threadripper power.
-      Hash: 4000                           # Increased hash for better position evaluation.
+      Threads: 6                          # Increased threads for Threadripper power.
+      Hash: 5120                           # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
    #   depth: 28                          # Maximum search depth for bullet.
@@ -60,13 +60,13 @@ engines:
 
 syzygy:
   standard:
-    enabled: false                        # Activate local syzygy endgame tablebases.
+    enabled: true                        # Activate local syzygy endgame tablebases.
     paths:                                # Paths to local syzygy endgame tablebases.
       - "./syzygy"
     max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
     instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
   chess960:
-    enabled: false                        # Activate local syzygy endgame tablebases.
+    enabled: true                        # Activate local syzygy endgame tablebases.
     paths:                                # Paths to local syzygy endgame tablebases.
       - "./syzygy"
     max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
