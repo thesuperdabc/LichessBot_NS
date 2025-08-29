@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  lichess-bot:
+    build: .
+    container_name: lichess-bot
+    restart: unless-stopped
+    environment:
+      - LICHESS_BOT_TOKEN=${LICHESS_BOT_TOKEN}
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=utf-8
+    volumes:
+      - ./logs:/app/logs
+      - ./books:/app/books
+    networks:
+      - lichess-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('https://lichess.org/api/account', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+networks:
+  lichess-network:
+    driver: bridge
