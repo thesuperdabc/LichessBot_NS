@@ -8,8 +8,8 @@ engines:
     silence_stderr: false                 # Suppresses stderr output.
     move_overhead_multiplier: 23.5        # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
-      Threads: 6                          # Increased threads for Threadripper power.
-      Hash: 5120                           # Increased hash for better position evaluation.
+      Threads: 4                        # Increased threads for Threadripper power.
+      Hash: 128                      # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
    #   depth: 28                          # Maximum search depth for bullet.
@@ -109,11 +109,15 @@ opening_books:
       max_depth: 20                    # Limit book depth so engine evaluates positions
       names:
         - nimas
+        - lila
+        - lilawhite
     0.5+0_black:                          # 30 sec bullet games (0.5+0)
       selection: best_move
       max_depth: 20                    # Limit book depth so engine evaluates positions
       names:
         - probook
+        - lila
+        - lilawhite
     bullet_white:                            # Other bullet games (1+0)
       selection: weighted_random
       max_depth: 20                    # Limit book depth so engine evaluates positions
@@ -126,15 +130,21 @@ opening_books:
       names:
         - small
         - probook
+        - lila
+        - lilawhite
     3+0:                             # Blitz games (5+3)
       selection: weighted_random
       names:
         - small
         - probook
+        - lila
+        - lilawhite
     standard:                           
       selection: weighted_random
       names:
         - small
+        - lila
+        - lilawhite
     antichess_white:
       selection: best_move
       names:
@@ -463,6 +473,8 @@ books:
   black3check: "./books/black3check.bin"
   small: "./books/small.bin"
   nimas: "./books/nimas.bin"
+  lila: "./books/lila.bin"
+  lilawhite: "./books/lilawhite.bin"
 
 
 
