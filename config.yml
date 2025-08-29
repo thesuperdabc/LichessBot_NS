@@ -6,7 +6,7 @@ engines:
     name: "sf"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 19.5         # Optimized for bullet games.
+    move_overhead_multiplier: 23.3         # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 6                          # Increased threads for Threadripper power.
       Hash: 5120                           # Increased hash for better position evaluation.
