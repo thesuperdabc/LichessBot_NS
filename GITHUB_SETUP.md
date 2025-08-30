@@ -39,6 +39,7 @@ Fork this repository to your GitHub account.
 - **Configurable 30-second draw handling** - Set `accept_30_second_draws: true/false` in config.yml
 - **Hint system** - 7-hint limit with respectful messages
 - **Ping command** - `!ping` shows real network latency
+- **Auto Rematch** – configurable in `config.yml`
 
 ## Configuration Options
 
