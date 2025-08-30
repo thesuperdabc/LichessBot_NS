@@ -102,21 +102,28 @@ jobs:
               ;;
             "tournament")
               if [[ -n "${{ github.event.inputs.tournament_id }}" ]]; then
-                # Prepare positional args
                 TOUR_ID="${{ github.event.inputs.tournament_id }}"
                 TEAM_ID="${{ github.event.inputs.team_id }}"
                 [[ -z "$TEAM_ID" ]] && TEAM_ID="''"
                 PASSWORD="${{ secrets.TOURNAMENT_PASSWORD }}"
                 [[ -z "$PASSWORD" ]] && PASSWORD="''"
 
-                # Retry loop until tournament join succeeds
                 echo "⚡ Attempting to join tournament $TOUR_ID..."
+                TIMEOUT=$((60*10))   # 10 minutes max retry
+                INTERVAL=60
+                ELAPSED=0
+
                 while true; do
                   DEBUG_CMD="$CMD tournament $TOUR_ID $TEAM_ID $PASSWORD"
                   echo "DEBUG: Running $DEBUG_CMD"
                   $DEBUG_CMD && break
-                  echo "Tournament not ready yet. Retrying in 60s..."
-                  sleep 60
+                  ELAPSED=$((ELAPSED+INTERVAL))
+                  if [ $ELAPSED -ge $TIMEOUT ]; then
+                    echo "⚠️ Timeout reached. Could not join tournament $TOUR_ID."
+                    exit 1
+                  fi
+                  echo "Tournament not ready or invalid ID. Retrying in $INTERVAL seconds..."
+                  sleep $INTERVAL
                 done
               else
                 echo "⚠️ Tournament ID missing. Running normal mode instead."
@@ -128,7 +135,6 @@ jobs:
               ;;
           esac
 
-          # Run normal or matchmaking mode
           if [[ "${{ github.event.inputs.mode }}" != "tournament" ]]; then
             echo "DEBUG: Running $CMD"
             eval "$CMD"
