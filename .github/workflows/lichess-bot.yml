@@ -50,7 +50,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install tenacity yq
+          pip install tenacity pyyaml
 
       - name: Setup Stockfish Engine
         run: |
@@ -70,18 +70,21 @@ jobs:
             chmod +x engines/ShashChess39
           fi
 
-      - name: Inject Lichess Bot Token
+      - name: Inject Lichess Bot Token (Python)
         run: |
-          if [ -z "${{ secrets.LICHESS_TOKEN }}" ]; then
-            echo "ERROR: LICHESS_TOKEN secret is missing!"
-            exit 1
-          fi
-          yq -i '.token = strenv(LICHESS_TOKEN)' config.yml
-          echo "✅ Token injected successfully"
-
-      - name: Debug Token Replacement
-        run: |
-          grep "token" config.yml
+          python3 << 'EOF'
+          import os, yaml
+          token = os.environ.get("LICHESS_TOKEN")
+          if not token:
+              print("ERROR: LICHESS_TOKEN secret is missing!")
+              exit(1)
+          with open("config.yml","r") as f:
+              config = yaml.safe_load(f) or {}
+          config["token"] = token
+          with open("config.yml","w") as f:
+              yaml.dump(config,f, default_flow_style=False)
+          print("✅ Token injected successfully")
+          EOF
 
       - name: Launch Bot
         run: |
