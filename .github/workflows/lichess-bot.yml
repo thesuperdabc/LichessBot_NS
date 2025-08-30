@@ -63,8 +63,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y unzip
           curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
           unzip -o stockfish.zip -d engines/
-          mv engines/stockfish_* engines/stockfish
-          chmod +x engines/stockfish
+          mv engines/stockfish_* engines/sf
+          chmod +x engines/sf
 
       - name: Setup Other Engines Permissions
         run: |
@@ -97,22 +97,24 @@ jobs:
         run: |
           CMD="python3 -u user_interface.py"
 
-          # Handle modes
           case "${{ github.event.inputs.mode }}" in
             "matchmaking")
               CMD="$CMD matchmaking"
               ;;
             "tournament")
               if [[ -n "${{ github.event.inputs.tournament_id }}" ]]; then
+                # Always pass three positional arguments: ID TEAM_ID PASSWORD
                 CMD="$CMD tournament ${{ github.event.inputs.tournament_id }}"
-                # Add optional team ID
+
                 if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
                   CMD="$CMD ${{ github.event.inputs.team_id }}"
+                else
+                  CMD="$CMD ''"
                 fi
-                # Add optional tournament password (from secrets)
-                if [[ -n "${{ secrets.TOURNAMENT_PASSWORD }}" ]]; then
-                  CMD="$CMD ${{ secrets.TOURNAMENT_PASSWORD }}"
-                fi
+
+                # Always add password placeholder (empty if not set)
+                CMD="$CMD ''"
+
               else
                 echo "⚠️ Tournament ID missing or invalid. Running normal mode instead."
                 CMD="$CMD normal"
