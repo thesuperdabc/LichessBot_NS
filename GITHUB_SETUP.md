@@ -30,8 +30,10 @@ Fork this repository to your GitHub account.
 - Auto-restart on schedule
 - Multiple parallel instances
 
-## An easy way for tournaments and matchmaking.
-     <img width="383" height="439" alt="image" src="https://github.com/user-attachments/assets/805de48e-6aed-414b-a7e5-67992efc943d" />
+## An Easy Way for Tournaments and Matchmaking
+
+![Tournament & Matchmaking](https://github.com/user-attachments/assets/805de48e-6aed-414b-a7e5-67992efc943d)
+
 
 ## Enhanced Features
 
