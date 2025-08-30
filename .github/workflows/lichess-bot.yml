@@ -42,7 +42,7 @@ permissions:
 jobs:
   bot-runner:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # 6 hours
+    timeout-minutes: 355  # restart just before GitHub limit
 
     steps:
       - name: Checkout Repository
@@ -60,21 +60,20 @@ jobs:
           pip install -r requirements.txt
           pip install tenacity pyyaml
 
-      - name: Setup Stockfish Engine
+      - name: Setup Engines
         run: |
           mkdir -p engines
           sudo apt-get update && sudo apt-get install -y unzip
+          # Stockfish
           curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
           unzip -o stockfish.zip -d engines/
           mv engines/stockfish_* engines/stockfish
           chmod +x engines/stockfish
-
-      - name: Setup Other Engines Permissions
-        run: |
+          # Other engines
           if [ -f "engines/fsf" ]; then chmod +x engines/fsf; fi
           if [ -f "engines/ShashChess39" ]; then chmod +x engines/ShashChess39; fi
 
-      - name: Inject Lichess Bot Token (Python)
+      - name: Inject Lichess Bot Token
         env:
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
         run: |
@@ -96,13 +95,9 @@ jobs:
         run: |
           CMD_BASE="python3 -u user_interface.py"
           MODE="${{ github.event.inputs.mode }}"
-          PASSWORD="${{ github.event.inputs.password }}"
+          TOUR_ID="${{ github.event.inputs.tournament_id }}"
           TEAM_ID="${{ github.event.inputs.team_id }}"
-
-          # List of tournaments to auto-join
-          TOURNAMENTS=( "${{ github.event.inputs.tournament_id }}" )
-          # You can add more tournament IDs here if needed:
-          # TOURNAMENTS+=( "abc123" "xyz789" )
+          PASSWORD="${{ github.event.inputs.password }}"
 
           if [[ "$MODE" == "matchmaking" ]]; then
               CMD="$CMD_BASE matchmaking"
@@ -110,18 +105,27 @@ jobs:
               eval "$CMD"
 
           elif [[ "$MODE" == "tournament" ]]; then
-              for TOUR_ID in "${TOURNAMENTS[@]}"; do
-                  if [[ -z "$TOUR_ID" ]]; then
-                      echo "⚠️ Tournament ID missing. Skipping."
-                      continue
-                  fi
-                  CMD="$CMD_BASE tournament $TOUR_ID"
-                  [[ -n "$TEAM_ID" ]] && CMD="$CMD $TEAM_ID"
-                  [[ -n "$PASSWORD" ]] && CMD="$CMD $PASSWORD"
-                  echo "🤖 Joining tournament: $TOUR_ID"
-                  eval "$CMD"
-              done
+              if [[ -z "$TOUR_ID" ]]; then
+                  echo "⚠️ Tournament ID missing. Skipping."
+              else
+                  # Construct CLI arguments correctly
+                  ARGS="$TOUR_ID"
+                  [[ -n "$TEAM_ID" ]] && ARGS="$ARGS $TEAM_ID"
+                  [[ -n "$PASSWORD" ]] && ARGS="$ARGS $PASSWORD"
+
+                  echo "🤖 Joining tournament: $ARGS"
+                  # pass tournament as real argument
+                  eval "$CMD_BASE \"tournament $ARGS\""
+              fi
+
           else
               echo "⚠️ Mode not recognized. Running normal mode."
               eval "$CMD_BASE"
           fi
+
+      - name: Auto-Restart After Timeout
+        run: |
+          BOT_PID=$!
+          ( sleep 20700 && echo "⏰ Time's up. Restarting bot..." && kill -SIGTERM $BOT_PID ) &
+          wait $BOT_PID
+          echo "Bot ended cleanly."
