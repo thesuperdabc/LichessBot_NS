@@ -96,46 +96,23 @@ jobs:
         run: |
           CMD="python3 -u user_interface.py"
 
-          case "${{ github.event.inputs.mode }}" in
-            "matchmaking")
+          if [[ "${{ github.event.inputs.mode }}" == "matchmaking" ]]; then
               CMD="$CMD matchmaking"
-              ;;
-            "tournament")
-              if [[ -n "${{ github.event.inputs.tournament_id }}" ]]; then
-                TOUR_ID="${{ github.event.inputs.tournament_id }}"
-                TEAM_ID="${{ github.event.inputs.team_id }}"
-                [[ -z "$TEAM_ID" ]] && TEAM_ID="''"
-                PASSWORD="${{ secrets.TOURNAMENT_PASSWORD }}"
-                [[ -z "$PASSWORD" ]] && PASSWORD="''"
 
-                echo "⚡ Attempting to join tournament $TOUR_ID..."
-                TIMEOUT=$((60*10))   # 10 minutes max retry
-                INTERVAL=60
-                ELAPSED=0
+          elif [[ "${{ github.event.inputs.mode }}" == "tournament" ]]; then
+              TOUR_ID="${{ github.event.inputs.tournament_id }}"
+              TEAM_ID="${{ github.event.inputs.team_id }}"
+              PASSWORD="${{ secrets.TOURNAMENT_PASSWORD }}"
 
-                while true; do
-                  DEBUG_CMD="$CMD tournament $TOUR_ID $TEAM_ID $PASSWORD"
-                  echo "DEBUG: Running $DEBUG_CMD"
-                  $DEBUG_CMD && break
-                  ELAPSED=$((ELAPSED+INTERVAL))
-                  if [ $ELAPSED -ge $TIMEOUT ]; then
-                    echo "⚠️ Timeout reached. Could not join tournament $TOUR_ID."
-                    exit 1
-                  fi
-                  echo "Tournament not ready or invalid ID. Retrying in $INTERVAL seconds..."
-                  sleep $INTERVAL
-                done
+              if [[ -z "$TOUR_ID" ]]; then
+                  echo "⚠️ Tournament ID missing. Running in normal mode instead."
+                  CMD="$CMD normal"
               else
-                echo "⚠️ Tournament ID missing. Running normal mode instead."
-                CMD="$CMD normal"
+                  CMD="$CMD tournament $TOUR_ID"
+                  [[ -n "$TEAM_ID" ]] && CMD="$CMD $TEAM_ID"
+                  [[ -n "$PASSWORD" ]] && CMD="$CMD $PASSWORD"
               fi
-              ;;
-            *)
-              CMD="$CMD normal"
-              ;;
-          esac
-
-          if [[ "${{ github.event.inputs.mode }}" != "tournament" ]]; then
-            echo "DEBUG: Running $CMD"
-            eval "$CMD"
           fi
+
+          echo "🤖 Running command: $CMD"
+          eval "$CMD"
