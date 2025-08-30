@@ -23,8 +23,12 @@ on:
         description: 'Team ID (optional)'
         type: string
         required: false
+      password:
+        description: 'Tournament password (optional)'
+        type: string
+        required: false
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *'  # every 6 hours
   push:
     branches: [ main ]
     paths:
@@ -38,7 +42,7 @@ permissions:
 jobs:
   bot-runner:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 360  # 6 hours
 
     steps:
       - name: Checkout Repository
@@ -67,14 +71,10 @@ jobs:
 
       - name: Setup Other Engines Permissions
         run: |
-          if [ -f "engines/fsf" ]; then
-            chmod +x engines/fsf
-          fi
-          if [ -f "engines/ShashChess39" ]; then
-            chmod +x engines/ShashChess39
-          fi
+          if [ -f "engines/fsf" ]; then chmod +x engines/fsf; fi
+          if [ -f "engines/ShashChess39" ]; then chmod +x engines/ShashChess39; fi
 
-      - name: Inject Lichess Bot Token
+      - name: Inject Lichess Bot Token (Python)
         env:
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
         run: |
@@ -94,25 +94,35 @@ jobs:
 
       - name: Launch Bot
         run: |
-          CMD="python3 -u user_interface.py"
+          CMD_BASE="python3 -u user_interface.py"
+          MODE="${{ github.event.inputs.mode }}"
+          PASSWORD="${{ github.event.inputs.password }}"
+          TEAM_ID="${{ github.event.inputs.team_id }}"
 
-          if [[ "${{ github.event.inputs.mode }}" == "matchmaking" ]]; then
-              CMD="$CMD matchmaking"
+          # List of tournaments to auto-join
+          TOURNAMENTS=(
+            "${{ github.event.inputs.tournament_id }}"
+          )
 
-          elif [[ "${{ github.event.inputs.mode }}" == "tournament" ]]; then
-              TOUR_ID="${{ github.event.inputs.tournament_id }}"
-              TEAM_ID="${{ github.event.inputs.team_id }}"
-              PASSWORD="${{ secrets.TOURNAMENT_PASSWORD }}"
+          if [[ "$MODE" == "matchmaking" ]]; then
+              CMD="$CMD_BASE matchmaking"
+              echo "🤖 Running command: $CMD"
+              eval "$CMD"
 
-              if [[ -z "$TOUR_ID" ]]; then
-                  echo "⚠️ Tournament ID missing. Running in normal mode instead."
-                  CMD="$CMD normal"
-              else
-                  CMD="$CMD tournament $TOUR_ID"
-                  [[ -n "$TEAM_ID" ]] && CMD="$CMD $TEAM_ID"
-                  [[ -n "$PASSWORD" ]] && CMD="$CMD $PASSWORD"
-              fi
+          elif [[ "$MODE" == "tournament" ]]; then
+              for TOUR_ID in "${TOURNAMENTS[@]}"; do
+                  if [[ -z "$TOUR_ID" ]]; then
+                      echo "⚠️ Tournament ID missing. Skipping."
+                      continue
+                  fi
+                  JOIN_CMD="tournament $TOUR_ID"
+                  [[ -n "$TEAM_ID" ]] && JOIN_CMD="$JOIN_CMD $TEAM_ID"
+                  [[ -n "$PASSWORD" ]] && JOIN_CMD="$JOIN_CMD $PASSWORD"
+
+                  echo "🤖 Joining tournament: $TOUR_ID"
+                  eval "echo \"$JOIN_CMD\" | $CMD_BASE"
+              done
+          else
+              echo "⚠️ Mode not recognized. Running normal mode."
+              eval "$CMD_BASE"
           fi
-
-          echo "🤖 Running command: $CMD"
-          eval "$CMD"
