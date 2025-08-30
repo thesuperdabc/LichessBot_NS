@@ -1,73 +1,89 @@
 name: Lichess Bot
 
 on:
-  push:
-    branches: [ main, master ]
-  schedule:
-    - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Bot Mode'
+        type: choice
+        required: true
+        options:
+          - normal
+          - matchmaking
+          - tournament
+      tournament_id:
+        description: 'Tournament ID (if tournament mode)'
+        type: string
+        required: false
+      team_id:
+        description: 'Team ID (optional)'
+        type: string
+        required: false
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+  push:
+    branches: [ main ]
+    paths:
+      - '**.py'
+      - 'config.yml'
 
-env:
-  LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
+permissions:
+  actions: write
+  contents: write
 
 jobs:
-  deploy-bot:
+  bot-runner:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
-    
-    # Removed matrix strategy to run single instance
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-    
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install tenacity  # Adding missing dependency
-        
-    - name: Download latest Stockfish dev
-      run: |
-        mkdir -p engines
-        sudo apt-get update && sudo apt-get install -y unzip
-        curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
-        unzip -o stockfish.zip -d engines/
-        mv engines/stockfish_* engines/sf
-        chmod +x engines/sf
-        
-    - name: Setup engines permissions
-      run: |
-        if [ -f "engines/fairy-stockfish" ]; then
-          chmod +x engines/fsf
-        fi
-        if [ -f "engines/ShashChess39" ]; then
-          chmod +x engines/ShashChess39
-        fi
+    timeout-minutes: 360  # 6 hours
 
-    - name: Setup token
-      run: |
-        python3 << 'EOF'
-        import yaml
-        try:
-            with open('config.yml', 'r') as f:
-                config = yaml.safe_load(f) or {}
-            config['token'] = "${{ secrets.LICHESS_TOKEN }}"
-            with open('config.yml', 'w') as f:
-                yaml.dump(config, f, default_flow_style=False)
-            print("✅ Token configuration successful")
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            exit(1)
-        EOF
-        
-    - name: Launch bot
-      timeout-minutes: 340
-      run: |
-        echo "🤖 Starting bot..."
-        python3 user_interface.py -u "matchmaking"
+    steps:
+      - name: Auto-cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+          
+      - name: Setup Engine
+        run: |
+          chmod +x ./engines/stockfish
+          chmod +x ./engines/fairy-stockfish_x86-64-bmi2 || true
+
+      - name: Configure Bot Token
+        run: sed -i "s/TokenTimeIsBackBuddyss/${{ secrets.LICHESS_KEY }}/g" config.yml
+
+      - name: Launch Bot
+        run: |
+          # Build command based on mode
+          CMD="python3 -u user_interface.py"
+          
+          case "${{ github.event.inputs.mode }}" in
+            "matchmaking")
+              CMD="$CMD matchmaking"
+              ;;
+            "tournament")
+              if [[ -n "${{ github.event.inputs.tournament_id }}" ]]; then
+                CMD="$CMD --tournament ${{ github.event.inputs.tournament_id }}"
+              fi
+              ;;
+          esac
+          
+          # Add team ID if provided
+          if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
+            CMD="$CMD --team ${{ github.event.inputs.team_id }}"
+          fi
+          
+          echo "Running command: $CMD"
+          eval "$CMD"
