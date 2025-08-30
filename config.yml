@@ -6,12 +6,13 @@ engines:
     name: "sf"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 23.5        # Optimized for bullet games.
+    move_overhead_multiplier: 21.0        # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
-      Threads: 6                          # Increased threads for Threadripper power.
+      Threads: 8                          # Increased threads for Threadripper power.
       Hash: 5120                           # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
+      time: 5.0
    #   depth: 28                          # Maximum search depth for bullet.
 
   chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
@@ -105,7 +106,7 @@ opening_books:
 #     names:                              # List of names of books to use as black.
 #       - BlackBook
     0.5+0_white:                          # 30 sec bullet games (0.5+0)
-      selection: best_move
+      selection: weighted_random
       max_depth: 20                    # Limit book depth so engine evaluates positions
       names:
         - nimas
@@ -300,7 +301,7 @@ rematch:
 # max_rating_diff: 300                    # Maximum rating difference to offer rematch.
 
 challenge:                                # Incoming challenges.
-  concurrency: 1                          # Number of games to play simultaneously.
+  concurrency: 3                          # Number of games to play simultaneously.
   max_takebacks: 3                        # Maximum number of takebacks granted to a human.
   bullet_with_increment_only: false       # Whether bullet games against BOTs should only be accepted with increment.
 # min_increment: 0                        # Minimum amount of increment to accept a challenge.
@@ -377,7 +378,7 @@ matchmaking:
       variant: chess960
     crazyhouse:
       enabled: true
-      tc: "1+0"
+      tc: "0.5+0"
       variant: crazyhouse
     threeCheck:
       enabled: true
