@@ -55,6 +55,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install tenacity 
 
       - name: Setup Stockfish Engine
         run: |
@@ -69,7 +70,7 @@ jobs:
           chmod +x ./engines/fsf || true
 
       - name: Configure Bot Token
-        run: sed -i "s/TokenTimeIsBackBuddyss/${{ secrets.LICHESS_KEY }}/g" config.yml
+        run: sed -i "s/XXXXXXXXXXXXXXXXXXX/${{ secrets.LICHESS_KEY }}/g" config.yml
 
       - name: Launch Bot
         run: |
