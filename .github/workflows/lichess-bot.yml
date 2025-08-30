@@ -1,5 +1,10 @@
 name: Lichess Bot Runner
 
+# Auto-cancel previous runs
+concurrency:
+  group: lichess-bot-runner
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:
@@ -20,7 +25,7 @@ on:
         type: string
         required: false
   schedule:
-    - cron: '0 */6 * * *'  # Run every 6 hours
+    - cron: '0 */6 * * *'  # Every 6 hours
   push:
     branches: [ main ]
     paths:
@@ -70,7 +75,7 @@ jobs:
             chmod +x engines/ShashChess39
           fi
 
-      - name: Inject Lichess Bot Token (Python)
+      - name: Inject Lichess Bot Token
         env:
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
         run: |
@@ -92,17 +97,22 @@ jobs:
         run: |
           CMD="python3 -u user_interface.py"
 
+          # Add mode subcommands
           case "${{ github.event.inputs.mode }}" in
             "matchmaking")
               CMD="$CMD matchmaking"
               ;;
             "tournament")
               if [[ -n "${{ github.event.inputs.tournament_id }}" ]]; then
-                CMD="$CMD --tournament ${{ github.event.inputs.tournament_id }}"
+                CMD="$CMD tournament ${{ github.event.inputs.tournament_id }}"
+              else
+                echo "⚠️ Tournament ID missing or invalid. Running in normal mode instead."
+                CMD="$CMD normal"
               fi
               ;;
           esac
 
+          # Add team ID if valid
           if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
             CMD="$CMD --team ${{ github.event.inputs.team_id }}"
           fi
