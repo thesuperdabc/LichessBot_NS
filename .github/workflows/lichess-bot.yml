@@ -55,7 +55,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install tenacity 
+          pip install tenacity yq
 
       - name: Setup Stockfish Engine
         run: |
@@ -64,17 +64,26 @@ jobs:
           unzip -o stockfish.zip -d engines/
           find engines/ -type f -name "stockfish_*" -exec mv {} engines/stockfish \;
           chmod +x engines/stockfish    
-          
+
       - name: Setup fsf Engine
         run: |
           chmod +x ./engines/fsf || true
 
-      - name: Configure Bot Token
-        run: sed -i "s/XXXXXXXXXXXXXXXXXXX/${{ secrets.LICHESS_KEY }}/g" config.yml
+      - name: Inject Lichess Bot Token
+        run: |
+          if [ -z "${{ secrets.LICHESS_KEY }}" ]; then
+            echo "ERROR: LICHESS_KEY secret is missing!"
+            exit 1
+          fi
+          yq -i '.token = strenv(LICHESS_KEY)' config.yml
+          echo "Token injected successfully."
+
+      - name: Debug Token Replacement
+        run: |
+          grep "token" config.yml
 
       - name: Launch Bot
         run: |
-          # Build command based on mode
           CMD="python3 -u user_interface.py"
           
           case "${{ github.event.inputs.mode }}" in
@@ -88,7 +97,6 @@ jobs:
               ;;
           esac
           
-          # Add team ID if provided
           if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
             CMD="$CMD --team ${{ github.event.inputs.team_id }}"
           fi
