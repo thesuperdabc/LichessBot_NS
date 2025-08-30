@@ -100,9 +100,9 @@ jobs:
           TEAM_ID="${{ github.event.inputs.team_id }}"
 
           # List of tournaments to auto-join
-          TOURNAMENTS=(
-            "${{ github.event.inputs.tournament_id }}"
-          )
+          TOURNAMENTS=( "${{ github.event.inputs.tournament_id }}" )
+          # You can add more tournament IDs here if needed:
+          # TOURNAMENTS+=( "abc123" "xyz789" )
 
           if [[ "$MODE" == "matchmaking" ]]; then
               CMD="$CMD_BASE matchmaking"
@@ -115,12 +115,11 @@ jobs:
                       echo "⚠️ Tournament ID missing. Skipping."
                       continue
                   fi
-                  JOIN_CMD="tournament $TOUR_ID"
-                  [[ -n "$TEAM_ID" ]] && JOIN_CMD="$JOIN_CMD $TEAM_ID"
-                  [[ -n "$PASSWORD" ]] && JOIN_CMD="$JOIN_CMD $PASSWORD"
-
+                  CMD="$CMD_BASE tournament $TOUR_ID"
+                  [[ -n "$TEAM_ID" ]] && CMD="$CMD $TEAM_ID"
+                  [[ -n "$PASSWORD" ]] && CMD="$CMD $PASSWORD"
                   echo "🤖 Joining tournament: $TOUR_ID"
-                  eval "echo \"$JOIN_CMD\" | $CMD_BASE"
+                  eval "$CMD"
               done
           else
               echo "⚠️ Mode not recognized. Running normal mode."
