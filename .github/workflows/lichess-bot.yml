@@ -71,6 +71,8 @@ jobs:
           fi
 
       - name: Inject Lichess Bot Token (Python)
+        env:
+          LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
         run: |
           python3 << 'EOF'
           import os, yaml
