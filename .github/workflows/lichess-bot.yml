@@ -63,8 +63,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y unzip
           curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
           unzip -o stockfish.zip -d engines/
-          mv engines/stockfish_* engines/stockfish
-          chmod +x engines/stockfish
+          mv engines/stockfish_* engines/sf
+          chmod +x engines/sf
 
       - name: Setup Other Engines Permissions
         run: |
@@ -97,7 +97,7 @@ jobs:
         run: |
           CMD="python3 -u user_interface.py"
 
-          # Add mode subcommands
+          # Handle modes
           case "${{ github.event.inputs.mode }}" in
             "matchmaking")
               CMD="$CMD matchmaking"
@@ -105,17 +105,19 @@ jobs:
             "tournament")
               if [[ -n "${{ github.event.inputs.tournament_id }}" ]]; then
                 CMD="$CMD tournament ${{ github.event.inputs.tournament_id }}"
+                # Add team ID if provided
+                if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
+                  CMD="$CMD ${{ github.event.inputs.team_id }}"
+                fi
               else
-                echo "⚠️ Tournament ID missing or invalid. Running in normal mode instead."
+                echo "⚠️ Tournament ID missing or invalid. Running normal mode instead."
                 CMD="$CMD normal"
               fi
               ;;
+            *)
+              CMD="$CMD normal"
+              ;;
           esac
-
-          # Add team ID if valid
-          if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
-            CMD="$CMD --team ${{ github.event.inputs.team_id }}"
-          fi
 
           echo "🤖 Running command: $CMD"
           eval "$CMD"
