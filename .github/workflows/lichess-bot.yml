@@ -55,11 +55,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir -r requirements.txt
-          
-      - name: Setup Engine
+
+      - name: Setup Stockfish Engine
         run: |
-          chmod +x ./engines/stockfish
-          chmod +x ./engines/fairy-stockfish_x86-64-bmi2 || true
+          mkdir -p engines
+          curl -L -o stockfish.zip "http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip"
+          unzip -o stockfish.zip -d engines/
+          find engines/ -type f -name "stockfish_*" -exec mv {} engines/stockfish \;
+          chmod +x engines/stockfish    
+          
+      - name: Setup fsf Engine
+        run: |
+          chmod +x ./engines/fsf || true
 
       - name: Configure Bot Token
         run: sed -i "s/TokenTimeIsBackBuddyss/${{ secrets.LICHESS_KEY }}/g" config.yml
