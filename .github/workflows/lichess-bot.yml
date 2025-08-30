@@ -1,4 +1,4 @@
-name: Lichess Bot
+name: Lichess Bot Runner
 
 on:
   workflow_dispatch:
@@ -37,13 +37,8 @@ jobs:
     timeout-minutes: 360  # 6 hours
 
     steps:
-      - name: Auto-cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -60,23 +55,29 @@ jobs:
       - name: Setup Stockfish Engine
         run: |
           mkdir -p engines
-          curl -L -o stockfish.zip "http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip"
+          sudo apt-get update && sudo apt-get install -y unzip
+          curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
           unzip -o stockfish.zip -d engines/
-          find engines/ -type f -name "stockfish_*" -exec mv {} engines/stockfish \;
-          chmod +x engines/stockfish    
+          mv engines/stockfish_* engines/sf
+          chmod +x engines/sf
 
-      - name: Setup fsf Engine
+      - name: Setup Other Engines Permissions
         run: |
-          chmod +x ./engines/fsf || true
+          if [ -f "engines/fsf" ]; then
+            chmod +x engines/fsf
+          fi
+          if [ -f "engines/ShashChess39" ]; then
+            chmod +x engines/ShashChess39
+          fi
 
       - name: Inject Lichess Bot Token
         run: |
-          if [ -z "${{ secrets.LICHESS_KEY }}" ]; then
-            echo "ERROR: LICHESS_KEY secret is missing!"
+          if [ -z "${{ secrets.LICHESS_TOKEN }}" ]; then
+            echo "ERROR: LICHESS_TOKEN secret is missing!"
             exit 1
           fi
-          yq -i '.token = strenv(LICHESS_KEY)' config.yml
-          echo "Token injected successfully."
+          yq -i '.token = strenv(LICHESS_TOKEN)' config.yml
+          echo "✅ Token injected successfully"
 
       - name: Debug Token Replacement
         run: |
@@ -85,7 +86,7 @@ jobs:
       - name: Launch Bot
         run: |
           CMD="python3 -u user_interface.py"
-          
+
           case "${{ github.event.inputs.mode }}" in
             "matchmaking")
               CMD="$CMD matchmaking"
@@ -96,10 +97,10 @@ jobs:
               fi
               ;;
           esac
-          
+
           if [[ -n "${{ github.event.inputs.team_id }}" ]]; then
             CMD="$CMD --team ${{ github.event.inputs.team_id }}"
           fi
-          
-          echo "Running command: $CMD"
+
+          echo "🤖 Running command: $CMD"
           eval "$CMD"
