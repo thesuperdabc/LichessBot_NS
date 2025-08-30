@@ -58,8 +58,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y unzip
           curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
           unzip -o stockfish.zip -d engines/
-          mv engines/stockfish_* engines/sf
-          chmod +x engines/sf
+          mv engines/stockfish_* engines/stockfish
+          chmod +x engines/stockfish
 
       - name: Setup Other Engines Permissions
         run: |
