@@ -387,7 +387,7 @@ books:
   whiterk: "./books/whiterk.bin"
   whiteatomic: "./books/whiteatomic.bin"
   blackatomic: "./books/blackatomic.bin"
-  horde: "./engines/horde.bin"
+  horde: "./books/horde.bin"
   chess960: "./books/chess960.bin"
   whitekingofhill: "./books/whitekingofhill.bin"
   blackkingofhill: "./books/blackkingofhill.bin"
