@@ -6,12 +6,13 @@ engines:
     name: "sf"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 10.0         # Optimized for bullet games.
+    move_overhead_multiplier: 21.0         # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Increased threads for Threadripper power.
-      Hash: 4000                           # Increased hash for better position evaluation.
-      Move Overhead: 250                 # Reduced for faster bullet moves.
+      Hash: 5120                           # Increased hash for better position evaluation.
+      Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
+      time: 3.0
    #   depth: 28                          # Maximum search depth for bullet.
 
   chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
@@ -19,11 +20,11 @@ engines:
     name: "sf"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 3.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
+    move_overhead_multiplier: 20.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Max CPU threads the engine can use.
       Hash: 5100                           # Max memory (in megabytes) the engine can allocate.
-      Move Overhead: 200                  # Increase if your bot flags games too often.
+      Move Overhead: 100                  # Increase if your bot flags games too often.
     limits:
     
   standard:                               # Engine used for standard chess and when no suitable special engine is configured.
