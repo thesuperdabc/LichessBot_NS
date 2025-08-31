@@ -3,10 +3,10 @@ token: "XXXXXXXXXXXXXXXXXXX"         # Lichess OAuth2 Token.
 engines:
   bullet:                               # Engine used for standard chess and when no suitable special engine is configured.
     dir: "./engines"                      # Directory containing the engine.
-    name: "sf"                     # Binary name of the engine to use.
+    name: "stockfish"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 21.0         # Optimized for bullet games.
+    move_overhead_multiplier: 21.0        # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Increased threads for Threadripper power.
       Hash: 5120                           # Increased hash for better position evaluation.
@@ -17,25 +17,25 @@ engines:
 
   chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
     dir: "./engines"                      # Directory containing the engine.
-    name: "sf"                     # Binary name of the engine to use.
+    name: "stockfish"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
     move_overhead_multiplier: 20.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Max CPU threads the engine can use.
-      Hash: 5100                           # Max memory (in megabytes) the engine can allocate.
+      Hash: 4096                           # Max memory (in megabytes) the engine can allocate.
       Move Overhead: 100                  # Increase if your bot flags games too often.
     limits:
     
   standard:                               # Engine used for standard chess and when no suitable special engine is configured.
     dir: "./engines"                      # Directory containing the engine.
-    name: "sf"                     # Binary name of the engine to use.
+    name: "stockfish"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
     move_overhead_multiplier: 1.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Maximum Threadripper power for longer games.
-      Hash: 10000                           # Massive hash for deep calculation.
+      Hash: 8192                           # Massive hash for deep calculation.
       Move Overhead: 100                  # Increase if your bot flags games too often.
     limits:    
   #    depth: 35                           # Deep search for standard games.
@@ -48,7 +48,7 @@ engines:
     move_overhead_multiplier: 1.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # High thread count for variants.
-      Hash: 11000                           # Large hash for variant calculations.
+      Hash: 8192                           # Large hash for variant calculations.
       Move Overhead: 100                  # Increase if your bot flags games too often.
       Use NNUE: true
       EvalFile: "3check-cb5f517c228b.nnue:antichess-dd3cbe53cd4e.nnue:atomic-2cf13ff256cc.nnue:crazyhouse-8ebf84784ad2.nnue:horde-28173ddccabe.nnue:kingofthehill-978b86d0e6a4.nnue:racingkings-636b95f085e3.nnue"
@@ -61,9 +61,15 @@ engines:
 
 syzygy:
   standard:
-    enabled: false                        # Activate local syzygy endgame tablebases.
+    enabled: true                        # Activate local syzygy endgame tablebases.
     paths:                                # Paths to local syzygy endgame tablebases.
-      - "/path/to/standard/syzygy"
+      - "./syzygy"
+    max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
+    instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
+  chess960:
+    enabled: true                        # Activate local syzygy endgame tablebases.
+    paths:                                # Paths to local syzygy endgame tablebases.
+      - "./syzygy"
     max_pieces: 7                         # Count of max pieces in the local syzygy endgame tablebases.
     instant_play: true                    # Whether the bot should play directly from syzygy without engine if possible.
   antichess:
@@ -99,11 +105,16 @@ opening_books:
 #     selection: best_move                # Move selection is one of "weighted_random", "uniform_random" or "best_move".
 #     names:                              # List of names of books to use as black.
 #       - BlackBook
-    0.5+0:                          # 30 sec bullet games (0.5+0)
-      selection: best_move
+    0.5+0_white:                          # 30 sec bullet games (0.5+0)
+      selection: weighted_random
       max_depth: 20                    # Limit book depth so engine evaluates positions
       names:
         - nimas
+    0.5+0_black:                          # 30 sec bullet games (0.5+0)
+      selection: best_move
+      max_depth: 20                    # Limit book depth so engine evaluates positions
+      names:
+        - probook
     bullet_white:                            # Other bullet games (1+0)
       selection: weighted_random
       max_depth: 20                    # Limit book depth so engine evaluates positions
@@ -276,6 +287,19 @@ resign:
   against_humans: false                    # Never resign against humans - fight till the end.
 # min_rating: 2300                        # Minimum rating of opponent to resign.
 
+rematch:
+  enabled: false                           # Enable rematch functionality.
+  max_consecutive: 3                      # Maximum consecutive rematches with same opponent.
+  offer_on_win: true                      # Offer rematch when we win.
+  offer_on_loss: true                     # Offer rematch when we lose.
+  offer_on_draw: true                     # Offer rematch on draws.
+  against_humans: false                    # Offer rematches against human players.
+  against_bots: true                      # Offer rematches against bot players.
+  delay_seconds: 1                        # Delay before offering rematch (seconds).
+  timeout_seconds: 30                     # Timeout for rematch challenges (seconds).
+# min_rating_diff: 0                      # Minimum rating difference to offer rematch.
+# max_rating_diff: 300                    # Maximum rating difference to offer rematch.
+
 challenge:                                # Incoming challenges.
   concurrency: 1                          # Number of games to play simultaneously.
   max_takebacks: 3                        # Maximum number of takebacks granted to a human.
@@ -330,14 +354,57 @@ challenge:                                # Incoming challenges.
     - rated                               # Rated games
 
 matchmaking:
-  delay: 10                               # Time in seconds the bot must be idle before a new challenge is started.
-  timeout: 30                             # Time until a challenge is canceled.
-  selection: weighted_random              # Matchmkaing type selection is one of "weighted_random", "sequential" or "cyclic".
-  types:                                  # Matchmaking types of which one is selected before each game.
-    bullet:                               # Arbitrary name of the matchmaking type. Names must be unique.
-      tc: 0.5+0                             # Time control in initial_minutes+increment_seconds format.
-    chess960:
-      tc: 0.5+0
+  delay: 120                               # Time in seconds the bot must be idle before a new challenge is started.
+  allow_matchmaking: true
+  challenge_mode: rated
+  timeout: 30
+  selection: weighted_random
+  types:
+    bullet_0_5:
+      enabled: true
+      tc: "0.5+0"      
+      variant: standard
+    blitz_3_0:
+      enabled: true
+      tc: "3+0"
+      variant: standard
+    rapid_8+0:
+      enabled: true
+      tc: "8+0"
+      variant: standard
+    0.5_chess960:
+      enabled: true
+      tc: "0.5+0"
+      variant: chess960
+#    crazyhouse:
+#      enabled: true
+#      tc: "0.5+0"
+#      variant: crazyhouse
+#    threeCheck:
+#      enabled: true
+#      tc: "1+0"
+#      variant: threeCheck
+#    kingOfTheHill:
+#      enabled: true
+#      tc: "0.5+0"
+#      variant: kingOfTheHill     
+#    atomic:
+#      enabled: true
+#      tc: "1+0"
+#      variant: atomic
+#    racingKings:
+#      enabled: true
+#      tc: "3+0"
+#      variant: racingKings
+#    antichess:
+#      enabled: true
+#      tc: "1+0" 
+#      variant: antichess 
+#    horde:
+#      enabled: true
+#      tc: "1+0" 
+#      variant: horde
+
 #   casual_chess960:
 #     tc: 0.5+1
 #     rated: false
@@ -381,7 +448,7 @@ books:
   Gukesh: "./masterbooks/Gukesh.bin"         # Gukesh's opening book
   Nakamura: "./masterbooks/Nakamura.bin"     # Nakamura's opening book
   Nepomniachtchi: "./masterbooks/Nepomniachtchi.bin"  # Nepomniachtchi's opening book
-  probook: "./books/probook.bin"
+  probook: "./books/lowpro.bin"
   whiteanti: "./books/whiteanti.bin"
   blackanti: "./books/blackanti.bin"
   blackrk: "./books/blackrk.bin"
@@ -397,14 +464,3 @@ books:
   black3check: "./books/black3check.bin"
   small: "./books/small.bin"
   nimas: "./books/nimas.bin"
-
-
-
-
-
-
-
-
-
-
-
