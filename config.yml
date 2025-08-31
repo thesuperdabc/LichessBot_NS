@@ -12,7 +12,7 @@ engines:
       Hash: 5120                           # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
-      time: 5.0
+      time: 3.0
    #   depth: 28                          # Maximum search depth for bullet.
 
   chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
@@ -354,7 +354,7 @@ challenge:                                # Incoming challenges.
     - rated                               # Rated games
 
 matchmaking:
-  delay: 60                               # Time in seconds the bot must be idle before a new challenge is started.
+  delay: 120                               # Time in seconds the bot must be idle before a new challenge is started.
   allow_matchmaking: true
   challenge_mode: rated
   timeout: 30
@@ -376,34 +376,34 @@ matchmaking:
       enabled: true
       tc: "0.5+0"
       variant: chess960
-    crazyhouse:
-      enabled: true
-      tc: "0.5+0"
-      variant: crazyhouse
-    threeCheck:
-      enabled: true
-      tc: "1+0"
-      variant: threeCheck
-    kingOfTheHill:
-      enabled: true
-      tc: "0.5+0"
-      variant: kingOfTheHill     
-    atomic:
-      enabled: true
-      tc: "1+0"
-      variant: atomic
-    racingKings:
-      enabled: true
-      tc: "3+0"
-      variant: racingKings
-    antichess:
-      enabled: true
-      tc: "1+0" 
-      variant: antichess 
-    horde:
-      enabled: true
-      tc: "1+0" 
-      variant: horde
+#    crazyhouse:
+#      enabled: true
+#      tc: "0.5+0"
+#      variant: crazyhouse
+#    threeCheck:
+#      enabled: true
+#      tc: "1+0"
+#      variant: threeCheck
+#    kingOfTheHill:
+#      enabled: true
+#      tc: "0.5+0"
+#      variant: kingOfTheHill     
+#    atomic:
+#      enabled: true
+#      tc: "1+0"
+#      variant: atomic
+#    racingKings:
+#      enabled: true
+#      tc: "3+0"
+#      variant: racingKings
+#    antichess:
+#      enabled: true
+#      tc: "1+0" 
+#      variant: antichess 
+#    horde:
+#      enabled: true
+#      tc: "1+0" 
+#      variant: horde
 
 #   casual_chess960:
 #     tc: 0.5+1
