@@ -6,13 +6,13 @@ engines:
     name: "stockfish"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 21.0        # Optimized for bullet games.
+    move_overhead_multiplier: 22.5        # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
-      Threads: 8                          # Increased threads for Threadripper power.
+      Threads: 4                          # Increased threads for Threadripper power.
       Hash: 5120                           # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
-      time: 3.0
+      time: 5.0
    #   depth: 28                          # Maximum search depth for bullet.
 
   chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
