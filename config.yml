@@ -448,7 +448,7 @@ books:
   Nakamura: "./masterbooks/Nakamura.bin"     # Nakamura's opening book
   Nepomniachtchi: "./masterbooks/Nepomniachtchi.bin"  # Nepomniachtchi's opening book
   lowpro: "./books/lowpro.bin"
-  probook: "/books/probook.bin"
+  probook: "./books/probook.bin"
   whiteanti: "./books/whiteanti.bin"
   blackanti: "./books/blackanti.bin"
   blackrk: "./books/blackrk.bin"
