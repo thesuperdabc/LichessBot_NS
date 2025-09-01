@@ -112,7 +112,7 @@ opening_books:
     0.5+0_black:                          # 30 sec bullet games (0.5+0)
       selection: best_move
       names:
-        - lowprobook
+        - lowpro
         - probook
     bullet_white:                            # Other bullet games (1+0)
       selection: weighted_random
