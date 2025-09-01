@@ -9,10 +9,9 @@ engines:
     move_overhead_multiplier: 22.5        # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 4                          # Increased threads for Threadripper power.
-      Hash: 5120                           # Increased hash for better position evaluation.
+      Hash: 4096                           # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
-      time: 5.0
    #   depth: 28                          # Maximum search depth for bullet.
 
   chess960:                               # Engine used for standard chess and when no suitable special engine is configured.
@@ -112,8 +111,8 @@ opening_books:
         - nimas
     0.5+0_black:                          # 30 sec bullet games (0.5+0)
       selection: best_move
-      max_depth: 20                    # Limit book depth so engine evaluates positions
       names:
+        - lowprobook
         - probook
     bullet_white:                            # Other bullet games (1+0)
       selection: weighted_random
@@ -448,7 +447,8 @@ books:
   Gukesh: "./masterbooks/Gukesh.bin"         # Gukesh's opening book
   Nakamura: "./masterbooks/Nakamura.bin"     # Nakamura's opening book
   Nepomniachtchi: "./masterbooks/Nepomniachtchi.bin"  # Nepomniachtchi's opening book
-  probook: "./books/lowpro.bin"
+  lowpro: "./books/lowpro.bin"
+  probook: "/books/probook.bin"
   whiteanti: "./books/whiteanti.bin"
   blackanti: "./books/blackanti.bin"
   blackrk: "./books/blackrk.bin"
