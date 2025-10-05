@@ -1,9 +1,7 @@
 name: Lichess Bot Runner
-
 concurrency:
   group: lichess-bot-runner
   cancel-in-progress: true
-
 on:
   workflow_dispatch:
     inputs:
@@ -28,51 +26,76 @@ on:
         type: string
         required: false
   schedule:
-    - cron: '0 */6 * * *'  # every 6 hours
+    - cron: '0 */6 * * *' # every 6 hours
   push:
     branches: [ main ]
     paths:
       - '**.py'
       - 'config.yml'
-
 permissions:
   actions: write
   contents: write
-
 jobs:
   bot-runner:
     runs-on: ubuntu-latest
-    timeout-minutes: 355  # restart just before GitHub limit
-
+    timeout-minutes: 355 # restart just before GitHub limit
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install tenacity pyyaml
-
-      - name: Setup Engines
+      - name: Prepare Engine Directory
         run: |
+          echo "Initializing engine storage..."
           mkdir -p engines
-          sudo apt-get update && sudo apt-get install -y unzip
-          # Stockfish
-          curl -L -o stockfish.zip http://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
+          sudo apt-get update && sudo apt-get install -y unzip curl
+      - name: Fetch Latest Stockfish
+        run: |
+          echo "Downloading the latest Stockfish build..."
+          mkdir -p engines
+          curl -k -L -o stockfish.zip https://abrok.eu/stockfish/latest/linux/stockfish_x64_modern.zip
           unzip -o stockfish.zip -d engines/
-          mv engines/stockfish_* engines/stockfish
+          # Find and rename any stockfish_*_x64_modern to stockfish
+          for file in engines/stockfish_*_x64_modern; do
+            if [ -f "$file" ]; then
+              mv "$file" engines/stockfish
+              break
+            fi
+          done
+          if [ ! -f engines/stockfish ]; then
+            echo "Stockfish binary not found! Extracted files:"
+            ls -la engines/
+            exit 1
+          fi
           chmod +x engines/stockfish
-          # Other engines
-          if [ -f "engines/fsf" ]; then chmod +x engines/fsf; fi
-          if [ -f "engines/ShashChess39" ]; then chmod +x engines/ShashChess39; fi
-
+      - name: Acquire Fairy-Stockfish
+        run: |
+          echo "Obtaining the latest Fairy-Stockfish..."
+          RUN_ID=$(curl -s -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/fairy-stockfish/Fairy-Stockfish/actions/workflows/release.yml/runs?per_page=1&branch=master&status=success" \
+            | jq -r '.workflow_runs[0].id')
+          ARTIFACT_URL=$(curl -s -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/fairy-stockfish/Fairy-Stockfish/actions/runs/$RUN_ID/artifacts" \
+            | jq -r '.artifacts[] | select(.name | contains("linux-x86-64-modern")) | .archive_download_url')
+          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o fsf.zip "$ARTIFACT_URL"
+          unzip -o fsf.zip -d engines/
+          if [ -f engines/fairy-stockfish_x86-64-modern ]; then
+            mv engines/fairy-stockfish_x86-64-modern engines/fsf
+          else
+            echo "Fairy-Stockfish binary not found!"
+            exit 1
+          fi
+          chmod +x engines/fsf
       - name: Inject Lichess Bot Token
         env:
           LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
@@ -90,7 +113,6 @@ jobs:
               yaml.dump(config,f, default_flow_style=False)
           print("✅ Token injected successfully")
           EOF
-
       - name: Launch Bot
         run: |
           CMD_BASE="python3 -u user_interface.py"
@@ -98,31 +120,24 @@ jobs:
           TOUR_ID="${{ github.event.inputs.tournament_id }}"
           TEAM_ID="${{ github.event.inputs.team_id }}"
           PASSWORD="${{ github.event.inputs.password }}"
-
           if [[ "$MODE" == "matchmaking" ]]; then
               CMD="$CMD_BASE matchmaking"
               echo "🤖 Running command: $CMD"
               eval "$CMD"
-
           elif [[ "$MODE" == "tournament" ]]; then
               if [[ -z "$TOUR_ID" ]]; then
                   echo "⚠️ Tournament ID missing. Skipping."
               else
-                  # Construct CLI arguments correctly
                   ARGS="$TOUR_ID"
                   [[ -n "$TEAM_ID" ]] && ARGS="$ARGS $TEAM_ID"
                   [[ -n "$PASSWORD" ]] && ARGS="$ARGS $PASSWORD"
-
                   echo "🤖 Joining tournament: $ARGS"
-                  # pass tournament as real argument
                   eval "$CMD_BASE \"tournament $ARGS\""
               fi
-
           else
               echo "⚠️ Mode not recognized. Running normal mode."
               eval "$CMD_BASE"
           fi
-
       - name: Auto-Restart After Timeout
         run: |
           BOT_PID=$!
