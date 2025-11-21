@@ -41,7 +41,7 @@ jobs:
     timeout-minutes: 355 # restart just before GitHub limit
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
