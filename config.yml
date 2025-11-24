@@ -8,8 +8,8 @@ engines:
     silence_stderr: false                 # Suppresses stderr output.
     move_overhead_multiplier: 22.5        # Optimized for bullet games.
     uci_options:                          # Arbitrary UCI options passed to the engine.
-      Threads: 4                          # Increased threads for Threadripper power.
-      Hash: 4096                           # Increased hash for better position evaluation.
+      Threads: 8                          # Increased threads for Threadripper power.
+      Hash: 5800                           # Increased hash for better position evaluation.
       Move Overhead: 100                  # Reduced for faster bullet moves.
     limits:                               # Limits that end the move calculation early.
    #   depth: 28                          # Maximum search depth for bullet.
@@ -31,11 +31,11 @@ engines:
     name: "stockfish"                     # Binary name of the engine to use.
     ponder: true                          # Think on opponent's time.
     silence_stderr: false                 # Suppresses stderr output.
-    move_overhead_multiplier: 5.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
+    move_overhead_multiplier: 23.0         # Increase if your bot flags games too often. Default move overhead is 1 second per 1 minute initital time.
     uci_options:                          # Arbitrary UCI options passed to the engine.
       Threads: 8                          # Maximum Threadripper power for longer games.
       Hash: 8192                           # Massive hash for deep calculation.
-      Move Overhead: 250                  # Increase if your bot flags games too often.
+      Move Overhead: 100                  # Increase if your bot flags games too often.
     limits:    
   #    depth: 35                           # Deep search for standard games.
   #    nodes: 8000000                      # High node count for thorough analysis.
